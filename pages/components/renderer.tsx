@@ -2,9 +2,10 @@ import React from 'react'
 import { NodeViewWrapper, NodeViewContent } from '@tiptap/react'
 import { MODE } from './extension';
 import dynamic from 'next/dynamic';
+import CustomErrorBoundary from './error';
 const Graphviz = dynamic(() => import('graphviz-react'), { ssr: false });
 
-export default (props) => {
+const Renderer =  (props: { node: { attrs: { mode: any; }; textContent: any; }; updateAttributes: (arg0: { mode: MODE; }) => void; }) => {
   const mode = props.node.attrs.mode;
   const content = props.node.textContent;
   const previewer = React.useRef(null);
@@ -19,8 +20,12 @@ export default (props) => {
       <span className="label" onClick={toggleMode} contentEditable={false}>{mode === MODE.PREVIEW ? '编辑' : '预览'}</span>
       <div hidden={mode === MODE.PREVIEW}><NodeViewContent className="content" /></div>
       <div hidden={mode === MODE.EDIT} id="preview" className="content" ref={previewer}>
-        <Graphviz dot={content}/>
+        <CustomErrorBoundary>
+          <Graphviz dot={content}/>
+        </CustomErrorBoundary>
       </div>
     </NodeViewWrapper>
   )
 }
+
+export default Renderer;
